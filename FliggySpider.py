@@ -23,6 +23,7 @@ def get_json(dep_city_code, arr_city_code, dep_date, dep_date2):
 
     r = requests.get(url, params=params, headers=headers)
     json_text = r.text
+    # print(json_text)
     json_text = json_text[18:len(json_text)-2]
     json_text = json_text.replace("{0:", "{\"0\":")
     json_text = json_text.replace(",1:", ",\"1\":")
