@@ -38,4 +38,4 @@ def get_json(dep_city_code, arr_city_code, dep_date, dep_date2):
 
 
 if __name__ == '__main__':
-    get_json('CTU', 'MAD', '2018-04-31', '2018-05-07')
+    get_json('CTU', 'MAD', '2018-04-30', '2018-05-07')
