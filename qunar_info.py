@@ -1,18 +1,21 @@
 from bs4 import BeautifulSoup
 from urllib import parse
-import base_site
+import base_site_info
 
 
-class QunarInfo(base_site.BaseSite):
+class QunarInfo(base_site_info.BaseSiteInfo):
+
+    site_name = '去哪儿'
 
     def get_l_prc(self, html):
 
         soup = BeautifulSoup(html, 'html.parser')
         spans = soup.find_all('p', attrs={'class': 'price'})
-        print(spans[3].text)
-        return spans[3].text.replace('¥', '')
+        # get the middle one on the week calendar
+        self.lowest_prc = int(spans[3].text.replace('¥', ''))
+        return self.lowest_prc
 
-    def get_url(self, f_city_nm, t_city_nm, f_city_cd, t_city_cd, f_date, t_date):
+    def get_url(self):
 
         r_str = 'https://flight.qunar.com/site/interroundtrip_compare.htm?'
         r_str += 'fromCity=%s'
@@ -24,4 +27,5 @@ class QunarInfo(base_site.BaseSite):
         r_str += '&from=qunarindex&lowestPrice=null&isInter=true&favoriteKey=&showTotalPr=null&adultNum=1'
         r_str += '&childNum=0&cabinClass='
 
-        return r_str % (parse.quote(f_city_nm), parse.quote(t_city_nm), f_city_cd, t_city_cd, f_date, t_date)
+        return r_str % (parse.quote(self.f_city_nm), parse.quote(self.t_city_nm), self.f_city_cd, self.t_city_cd,
+                        self.f_date, self.t_date)
