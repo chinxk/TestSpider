@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from urllib import parse
 import base_site_info
+import time
+import re
 
 
 class QunarInfo(base_site_info.BaseSiteInfo):
@@ -10,9 +12,16 @@ class QunarInfo(base_site_info.BaseSiteInfo):
     def get_l_prc(self, html):
 
         soup = BeautifulSoup(html, 'html.parser')
+        time.sleep(10)
         spans = soup.find_all('p', attrs={'class': 'price'})
         # get the middle one on the week calendar
-        self.lowest_prc = int(spans[3].text.replace('¥', ''))
+        #self.lowest_prc = int(spans[3].text.replace('¥', ''))
+        try:
+            self.lowest_prc = int(re.sub("\D", "", spans[3].text))
+        except IndexError:
+            self.lowest_prc = 99999
+        except ValueError:
+            self.lowest_prc = 99999
         return self.lowest_prc
 
     def get_url(self):

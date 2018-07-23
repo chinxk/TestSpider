@@ -13,13 +13,14 @@ class BaseSiteInfo:
     f_date = 'null'
     t_date = 'null'
 
-    def __init__(self, f_city_nm, t_city_nm, f_city_cd, t_city_cd, f_date, t_date):
-        self.f_city_nm = f_city_nm
-        self.t_city_nm = t_city_nm
-        self.f_city_cd = f_city_cd
-        self.t_city_cd = t_city_cd
-        self.f_date = f_date
-        self.t_date = t_date
+    def __init__(self, msg):
+        args = msg.split(',')
+        self.f_city_nm = args[0]
+        self.t_city_nm = args[1]
+        self.f_city_cd = args[2]
+        self.t_city_cd = args[3]
+        self.f_date = args[4]
+        self.t_date = args[5]
 
     @abstractmethod
     def get_l_prc(self, html):
@@ -30,4 +31,8 @@ class BaseSiteInfo:
         pass
 
     def get_dis_info(self):
-        return '[%s,%s],[%s]往返[%s],在[%s]上的最低价:[%s]' % (self.f_date, self.t_date, self.f_city_nm, self.t_city_nm, self.site_name, self.lowest_prc)
+        if self.lowest_prc == 99999:
+            r = "站点[ %s ]失效." % self.site_name
+        else:
+            r = '[%s,%s],[%s]往返[%s],在[%s]上的最低价:[%s]' % (self.f_date, self.t_date, self.f_city_nm, self.t_city_nm, self.site_name, self.lowest_prc)
+        return r

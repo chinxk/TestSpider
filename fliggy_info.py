@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from urllib import parse
 import base_site_info
+import re
+import time
 
 
 class FliggyInfo(base_site_info.BaseSiteInfo):
@@ -10,10 +12,19 @@ class FliggyInfo(base_site_info.BaseSiteInfo):
     def get_l_prc(self, html):
 
         soup = BeautifulSoup(html, 'html.parser')
-        div = soup.find('div', attrs={'class': 'week-price'})
-        td = div.find('td', attrs={'class': 'current'})
-        price = td.find('span', attrs={'class': 'totalprice'})
-        self.lowest_prc = int(price.text.replace('¥', ''))
+        time.sleep(10)
+        try:
+            div = soup.find('div', attrs={'class': 'week-price'})
+            td = div.find('td', attrs={'class': 'current'})
+            price = td.find('span', attrs={'class': 'totalprice'})
+            #self.lowest_prc = int(price.text.replace('¥', ''))
+            self.lowest_prc = int(re.sub("\D", "", price.text))
+        except AttributeError:
+            self.lowest_prc = 99999
+        except IndexError:
+            self.lowest_prc = 99999
+        except ValueError:
+            self.lowest_prc = 99999
         return self.lowest_prc
 
     def get_url(self):

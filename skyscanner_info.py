@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import base_site_info
+import re
 
 
 class SkyScannerInfo(base_site_info.BaseSiteInfo):
@@ -11,7 +12,14 @@ class SkyScannerInfo(base_site_info.BaseSiteInfo):
         soup = BeautifulSoup(html, 'html.parser')
         spans = soup.find_all('span', attrs={'class': 'fqs-price'})
         # get the middle one on the fqs ops
-        self.lowest_prc = int(spans[1].text.replace('¥', '').replace(',', ''))
+        # self.lowest_prc = int(spans[1].text.replace('¥', '').replace(',', ''))
+        try:
+            self.lowest_prc = int(re.sub("\D", "", spans[1].text))
+        except IndexError:
+            self.lowest_prc = 99999
+        except ValueError:
+            self.lowest_prc = 99999
+
         return self.lowest_prc
 
     def get_url(self):

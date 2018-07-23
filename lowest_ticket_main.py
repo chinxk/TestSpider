@@ -7,6 +7,32 @@ import fliggy_info
 import skyscanner_info
 import email_sender
 import base_site_info
+import stomp
+
+
+def deal_msg(msg):
+    qunar = qunar_info.QunarInfo(msg)
+    ctrip = ctrip_info.CtripInfo(msg)
+    fliggy = fliggy_info.FliggyInfo(msg)
+    skyscanner = skyscanner_info.SkyScannerInfo(msg)
+
+    target_sites = [qunar, ctrip, fliggy, skyscanner]
+    # target_sites = [skyscanner]
+    target_site = get_site_lowest_site(target_sites)
+
+    if target_site.lowest_prc < tgt_prc:
+        print("目前最低价格%s,低于预设最低价格%s.开始Email通知." % (target_site.lowest_prc, tgt_prc))
+    # email_sender.sent_email(eml_pw, target_site.get_dis_info())
+
+
+class SampleListener(object):
+    def on_error(self, headers, message):
+        print('received an error %s' % message)
+
+    def on_message(self, headers, message):
+        print('received a message %s' % message)
+        deal_msg(message)
+
 
 def get_site_lowest_site(target_sites):
     # 构造一个PHANTOMJS对象
@@ -26,7 +52,7 @@ def get_site_lowest_site(target_sites):
     browser.implicitly_wait(40000)
 
     current_price = 99999
-    lowest_site = base_site_info.BaseSiteInfo('', '', '', '', '', '')
+    lowest_site = base_site_info.BaseSiteInfo(',,,,,')
     for site in target_sites:
         url = site.get_url()
         browser.get(url)
@@ -44,17 +70,22 @@ def get_site_lowest_site(target_sites):
 
 if __name__ == '__main__':
 
-    eml_pw = input("email password : = ")
+    #eml_pw = input("email password : = ")
     tgt_prc = int(input("target price : = "))
 
-    qunar = qunar_info.QunarInfo('成都', '马德里', 'CTU', 'MAD', '2018-05-01', '2018-05-07')
-    ctrip = ctrip_info.CtripInfo('成都', '马德里', 'CTU', 'MAD', '2018-05-01', '2018-05-07')
-    fliggy = fliggy_info.FliggyInfo('成都', '马德里', 'CTU', 'MAD', '2018-05-01', '2018-05-07')
-    skyscanner = skyscanner_info.SkyScannerInfo('成都', '马德里', 'CTU', 'MAD', '2018-05-01', '2018-05-07')
+    #read mq
+    conn = stomp.Connection(host_and_ports=[('localhost', '61613')])
+    conn.set_listener("", SampleListener())
+    conn.start()
+    conn.connect(login='admin', password='admin')
+    conn.subscribe(destination='/queue/test', id=3, ack='auto')
+    print("waiting for messages...")
+    while 1:
+        time.sleep(10)
 
-    target_sites = [qunar, ctrip, fliggy, skyscanner]
-    target_site = get_site_lowest_site(target_sites)
+    #msg = '成都,新加坡,CTU,SIN,2018-12-15,2018-12-19'
+    #conn.send(body=msg, destination='/queue/test')
+    #time.sleep(2)
+    conn.disconnect()
 
-    if target_site.lowest_prc < tgt_prc:
-        print("目前价格%s,低于预设最低价格%s.开始Email通知." % (target_site.lowest_prc, tgt_prc))
-        email_sender.sent_email(eml_pw, target_site.get_dis_info())
+

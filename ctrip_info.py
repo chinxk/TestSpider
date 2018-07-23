@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import base_site_info
-
+import re
 
 class CtripInfo(base_site_info.BaseSiteInfo):
 
@@ -13,7 +13,13 @@ class CtripInfo(base_site_info.BaseSiteInfo):
         li = div.find('li', attrs={'class': 'tab active'})
         price = li.find('div', attrs={'class': 'price'})
         # get the middle one on the week calendar
-        self.lowest_prc = int(price.text.replace('¥', ''))
+        # self.lowest_prc = int(price.text.replace('¥', ''))
+        try:
+            self.lowest_prc = int(re.sub("\D", "", price.text))
+        except IndexError:
+            self.lowest_prc = 99999
+        except ValueError:
+            self.lowest_prc = 99999
         return self.lowest_prc
 
     def get_url(self):
