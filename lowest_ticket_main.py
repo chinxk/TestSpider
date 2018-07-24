@@ -7,7 +7,7 @@ import fliggy_info
 import skyscanner_info
 import email_sender
 import base_site_info
-import stomp
+import redis
 
 
 def deal_msg(msg):
@@ -74,18 +74,30 @@ if __name__ == '__main__':
     tgt_prc = int(input("target price : = "))
 
     #read mq
-    conn = stomp.Connection(host_and_ports=[('localhost', '61613')])
-    conn.set_listener("", SampleListener())
-    conn.start()
-    conn.connect(login='admin', password='admin')
-    conn.subscribe(destination='/queue/test', id=3, ack='auto')
-    print("waiting for messages...")
+    #conn = stomp.Connection(host_and_ports=[('localhost', '61613')])
+    #conn.set_listener("", SampleListener())
+    #conn.start()
+    #conn.connect(login='admin', password='admin')
+    #conn.subscribe(destination='/queue/test', id=3, ack='auto')
+    #print("waiting for messages...")
+    #while 1:
+    #    time.sleep(10)
+
+    # read redis
+    pool = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0, password='rd123467')
+    r = redis.StrictRedis(connection_pool=pool)
+
     while 1:
-        time.sleep(10)
+        keys = r.keys()
+        print(keys)
+        for key in keys:
+            msg = r.get(key).decode('gbk')
+            print('msg:%s' % msg)
+            deal_msg(msg)
 
     #msg = '成都,新加坡,CTU,SIN,2018-12-15,2018-12-19'
     #conn.send(body=msg, destination='/queue/test')
     #time.sleep(2)
-    conn.disconnect()
+    #conn.disconnect()
 
 
